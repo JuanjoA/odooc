@@ -26,7 +26,8 @@ defmodule Odooc.MixProject do
       {:hackney, "~> 1.17"},
       {:jason, ">= 1.0.0"},
       {:ex_doc, "~> 0.11", only: :dev},
-      {:earmark, "~> 0.1", only: :dev}
+      {:earmark, "~> 0.1", only: :dev},
+
     ]
   end
 end
