@@ -28,9 +28,8 @@ defmodule Odoo do
 
   ```
   iex> {:ok, odoo} = Odoo.login(
-    "admin", "admin", "mydatabasename",
-    "https://mydatabasename.odoo.com")
-
+  "admin", "admin", "mydatabasename",
+  "https://mydatabasename.odoo.com")
   {:ok,
   %Odoo.Session{
     cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
@@ -126,8 +125,7 @@ defmodule Odoo do
   ### Examples
   ```elixir
     iex>  {:ok, partner_ids} = Odoo.search(
-      odoo,
-      "res.partner",
+    odoo, "res.partner",
       [ domain: [
           ["name", "ilike", "Antonia%"],
           ["customer", "=", true],
@@ -155,7 +153,17 @@ defmodule Odoo do
   ### Examples
 
   ```elixir
-  iex> {:ok, odoo} = Odoo.login()
+  iex> {:ok, odoo} = Odoo.login(
+  ...>    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
+  {:ok,
+  %Odoo.Session{
+    cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
+    database: "mydatabasename",
+    password: "admin",
+    url: "https://mydatabasename.odoo.com",
+    user: "admin",
+    user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
+  }}
   iex> {:ok, product_id} = Odoo.create(odoo, "product.product", [name: "mi mega producto3"])
   {:ok, 63}
   ```
@@ -172,12 +180,19 @@ defmodule Odoo do
   ### Examples
 
   ```elixir
-  iex> {:ok, odoo} = Odoo.login()
+  iex> {:ok, odoo} = Odoo.login(
+  ...>    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
+  {:ok,
+  %Odoo.Session{
+    cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
+    database: "mydatabasename",
+    password: "admin",
+    url: "https://mydatabasename.odoo.com",
+    user: "admin",
+    user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
+  }}
   iex> {:ok, product} = Odoo.read(
-    odoo,
-    "product.product",
-    [63],
-    [fields: ["name", "categ_id"]])
+  odoo, "product.product", [63], [fields: ["name", "categ_id"]])
 
   {:ok, [%{"categ_id" => [1, "All"], "id" => 63, "name" => "mi mega producto3"}]}
   ```
@@ -202,8 +217,7 @@ defmodule Odoo do
 
   ```elixir
   iex> {:ok, result} = Odoo.read_group(
-      odoo,
-      "account.invoice", [
+  odoo, "account.invoice", [
         domain: [["date_invoice", ">=", "2021-11-01"]],
         groupby: ["date_invoice:month"],
         fields: ["number", "partner_id"], limit: 2, lazy: true])
@@ -243,7 +257,17 @@ defmodule Odoo do
   ### Examples
 
   ```elixir
-  iex> {:ok, odoo} = Odoo.login()
+  iex> {:ok, odoo} = Odoo.login(
+  ...>    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
+  {:ok,
+  %Odoo.Session{
+    cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
+    database: "mydatabasename",
+    password: "admin",
+    url: "https://mydatabasename.odoo.com",
+    user: "admin",
+    user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
+  }}
   iex> {:ok, result} = Odoo.write(odoo, "product.product", [63], [name: "Mega Pro 3"])
   {:ok, true}
   ```
@@ -256,7 +280,19 @@ defmodule Odoo do
   - Delete objects by id
 
   ### Examples
+
   ```elixir
+  iex> {:ok, odoo} = Odoo.login(
+  ...>    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
+  {:ok,
+  %Odoo.Session{
+    cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
+    database: "mydatabasename",
+    password: "admin",
+    url: "https://mydatabasename.odoo.com",
+    user: "admin",
+    user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
+  }}
   iex> {:ok, result} = Odoo.delete(odoo, "product.product", [63])
   {:ok, true}
   ```
@@ -272,8 +308,19 @@ defmodule Odoo do
   ### Examples
 
   ```elixir
+  iex> {:ok, odoo} = Odoo.login(
+  ...>    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
+  {:ok,
+  %Odoo.Session{
+    cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
+    database: "mydatabasename",
+    password: "admin",
+    url: "https://mydatabasename.odoo.com",
+    user: "admin",
+    user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
+  }}
   iex> {:ok, result} = Odoo.search_read(
-        odoo, "product.product", limit: 5, fields: ["name"], order: "id asc")
+  ...>      odoo, "product.product", limit: 5, fields: ["name"], order: "id asc")
   {:ok,
     %Odoo.Result{
       data: [
@@ -286,9 +333,8 @@ defmodule Odoo do
       model: "product.product",
       opts: [limit: 5, fields: ["name"], order: "id asc"]
     }}
-
-   iex> {:ok, result2} = Odoo.next(odoo, result)
-   {:ok,
+  iex> {:ok, result2} = Odoo.next(odoo, result)
+  {:ok,
     %Odoo.Result{
       data: [
         %{"id" => 6, "name" => "Office Lamp"},
@@ -315,7 +361,31 @@ defmodule Odoo do
   ### Examples
 
   ```elixir
-  ...
+  iex> {:ok, odoo} = Odoo.login(
+  ...>    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
+  {:ok,
+  %Odoo.Session{
+    cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
+    database: "mydatabasename",
+    password: "admin",
+    url: "https://mydatabasename.odoo.com",
+    user: "admin",
+    user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
+  }}
+  iex> {:ok, result} = Odoo.search_read(
+  ...>      odoo, "product.product", limit: 5, fields: ["name"], order: "id asc")
+  {:ok,
+    %Odoo.Result{
+      data: [
+        %{"id" => 1, "name" => "Restaurant Expenses"},
+        %{"id" => 2, "name" => "Hotel Accommodation"},
+        %{"id" => 3, "name" => "Virtual Interior Design"},
+        %{"id" => 4, "name" => "Virtual Home Staging"},
+        %{"id" => 5, "name" => "Office Chair"}
+      ],
+      model: "product.product",
+      opts: [limit: 5, fields: ["name"], order: "id asc"]
+    }}
   iex> {:ok, result2} = Odoo.next(odoo, result)
   {:ok,
       %Odoo.Result{
@@ -329,7 +399,6 @@ defmodule Odoo do
         model: "product.product",
         opts: [offset: 5, limit: 5, fields: ["name"], order: "id asc"]
       }}
-
   iex> {:ok, result3} = Odoo.prev(odoo, result2)
   {:ok,
     %Odoo.Result{
