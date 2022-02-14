@@ -213,10 +213,6 @@ defmodule Odoo.Core do
         # error from odoo, not for http client
         {:error, "Odoo error: #{error["message"]} - #{error["data"]["message"]}"}
 
-      {:ok, %{"error" => error}, _status} ->
-        # error from odoo, not for http client
-        {:error, "Odoo error: #{error["message"]} - #{error["data"]["message"]}"}
-
       {:ok, body, _status, _cookie} ->
         result = Map.put(result, :data, body["result"])
         {:ok, result}

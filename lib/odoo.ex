@@ -44,7 +44,7 @@ defmodule Odoo do
   ```
   """
   @spec login(String.t(), String.t(), String.t(), String.t()) ::
-          {:ok, Odoo.Session.t()} | {:error, String.t()}
+          {:ok, %Odoo.Session{}} | {:error, String.t()}
   def login(user, password, database, url) do
     Odoo.Core.login(user, password, database, parse_url(url))
   end
@@ -104,6 +104,15 @@ defmodule Odoo do
   ```
 
   """
+  @type options ::
+          {:limit, non_neg_integer()}
+          | {:offset, non_neg_integer()}
+          | {:order, String.t()}
+          | {:fields, [String.t(), ...]}
+          | {:domain, [list(), ...]}
+  @spec search_read(%Odoo.Session{}, String.t(), options) ::
+          {:ok, %Odoo.Result{}} | {:error, String.t()}
+  @spec search_read(%Odoo.Session{}, String.t()) :: {:ok, %Odoo.Result{}} | {:error, String.t()}
   def search_read(odoo = %Odoo.Session{}, model, opts \\ []) do
     Odoo.Core.search_read(odoo, model, opts)
   end
