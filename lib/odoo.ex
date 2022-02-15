@@ -110,7 +110,7 @@ defmodule Odoo do
           | {:order, String.t()}
           | {:fields, [String.t(), ...]}
           | {:domain, [list(), ...]}
-  @spec search_read(%Odoo.Session{}, String.t(), [option]) ::
+  @spec search_read(%Odoo.Session{}, String.t(), [option, ...]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   @spec search_read(%Odoo.Session{}, String.t()) :: {:ok, %Odoo.Result{}} | {:error, String.t()}
   def search_read(odoo = %Odoo.Session{}, model, opts \\ []) do
