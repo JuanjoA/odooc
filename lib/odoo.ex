@@ -104,13 +104,13 @@ defmodule Odoo do
   ```
 
   """
-  @type options ::
+  @type option ::
           {:limit, non_neg_integer()}
           | {:offset, non_neg_integer()}
           | {:order, String.t()}
           | {:fields, [String.t(), ...]}
           | {:domain, [list(), ...]}
-  @spec search_read(%Odoo.Session{}, String.t(), options) ::
+  @spec search_read(%Odoo.Session{}, String.t(), [option]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   @spec search_read(%Odoo.Session{}, String.t()) :: {:ok, %Odoo.Result{}} | {:error, String.t()}
   def search_read(odoo = %Odoo.Session{}, model, opts \\ []) do
