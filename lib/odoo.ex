@@ -279,6 +279,16 @@ defmodule Odoo do
   }}
   iex> {:ok, result} = Odoo.write(odoo, "product.product", [63], [name: "Mega Pro 3"])
   {:ok, true}
+
+
+  Other example adding a many2many value to an odoo object:
+
+  category_to_link_id = 9
+  {:ok, result} = Odoo.write(
+      odoo,
+      "res.partner",
+      partner_ids,
+      [category_id: [[4, category_to_link_id]] ])
   ```
   """
   def write(odoo = %Odoo.Session{}, model, object_id, opts \\ []) do
