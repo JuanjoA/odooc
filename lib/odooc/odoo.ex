@@ -6,21 +6,6 @@ defmodule Odoo.Core do
   @odoo_call_kw_endpoint "/web/dataset/call_kw"
   @odoo_login_endpoint "/web/session/authenticate"
 
-  defp json_rpc(url, method, params, session_id \\ nil) do
-    data = %{
-      "jsonrpc" => "2.0",
-      "method" => method,
-      "params" => params,
-      "id" => :rand.uniform(9999)
-    }
-
-    if session_id do
-      Odoo.HttpClient.opost(url, data, session_id)
-    else
-      Odoo.HttpClient.opost(url, data)
-    end
-  end
-
   def login(user, password, database, url) do
     url_endpoint = url <> @odoo_login_endpoint
 
@@ -46,14 +31,6 @@ defmodule Odoo.Core do
 
         {:ok, odoo_session}
     end
-  end
-
-  defp unpack_body(odoo = %Session{}, body) do
-    Map.put(odoo, :user_context, body["user_context"])
-  end
-
-  defp unpack_cookie(odoo = %Session{}, cookie) do
-    Map.put(odoo, :cookie, cookie)
   end
 
   def search(odoo = %Odoo.Session{}, model, opts \\ []) do
@@ -183,18 +160,15 @@ defmodule Odoo.Core do
 
   def delete(odoo = %Odoo.Session{}, model, object_ids) do
     url = odoo.url <> @odoo_call_kw_endpoint
-
     kwargs =
       %{}
       |> Map.put(:context, odoo.user_context)
-
     params = %{
       "model" => model,
       "method" => "unlink",
       "args" => object_ids,
       "kwargs" => kwargs
     }
-
     json_rpc(url, "call", params, odoo.cookie)
     |> return_data(model, object_ids)
   end
@@ -221,4 +195,27 @@ defmodule Odoo.Core do
         {:error, "Unknow Error from http client"}
     end
   end
+
+  defp unpack_body(odoo = %Session{}, body) do
+    Map.put(odoo, :user_context, body["user_context"])
+  end
+
+  defp unpack_cookie(odoo = %Session{}, cookie) do
+    Map.put(odoo, :cookie, cookie)
+  end
+
+  defp json_rpc(url, method, params, session_id \\ nil) do
+    data = %{
+      "jsonrpc" => "2.0",
+      "method" => method,
+      "params" => params,
+      "id" => :rand.uniform(9999)
+    }
+    if session_id do
+      Odoo.HttpClient.opost(url, data, session_id)
+    else
+      Odoo.HttpClient.opost(url, data)
+    end
+  end
+
 end
