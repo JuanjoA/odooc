@@ -15,7 +15,7 @@ defmodule Odooc.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Odooc.Application, []}
+      # mod: {Odooc.Application, []}
     ]
   end
 
