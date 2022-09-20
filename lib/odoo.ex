@@ -160,9 +160,51 @@ defmodule Odoo do
   {:ok, 63}
   ```
 
+  You can specify the context language to create the object in the desired language.
+  ```elixir
+  iex(44)> {:ok, result} = Odoo.create(odoo, "product.product", [name: "Product2"], [lang: "en_US"])
+  {:ok,
+  %Odoo.Result{data: 185, model: "product.product", opts: [name: "Product2"]}}
+  ```
+
   """
-  def create(odoo = %Odoo.Session{}, model, opts \\ []) do
-    Odoo.Core.create(odoo, model, opts)
+  def create(odoo = %Odoo.Session{}, model, opts \\ [], context \\ []) do
+    Odoo.Core.create(odoo, model, opts, context)
+  end
+
+  @doc """
+  - Update objects by id
+
+  ## Examples
+
+  ### Update product translation
+
+  ```elixir
+  iex> {:ok, odoo} = Odoo.login()
+  iex> {:ok, result} = Odoo.write(
+    odoo,  # odoo session
+    "product.product",  # model
+    [183],   # product id
+    [name: "Producto1 test número2"],  # fields to update
+    [lang: "es_ES"])  # language context
+    {:ok,
+    %Odoo.Result{
+      data: true,
+      model: "product.product",
+      opts: [name: "Producto1 test número2"]
+    }}
+  ```
+
+  If we dont specify the language, the default user context language will be used.
+
+  ```elixir
+  iex> {:ok, odoo} = Odoo.login()
+  iex> {:ok, result} = Odoo.write(odoo, "product.product", [63], [name: "Mega Pro 3"])
+  {:ok, %Odoo.Result{...}}
+  ```
+  """
+  def write(odoo = %Odoo.Session{}, model, object_id, opts \\ [], context \\ []) do
+    Odoo.Core.write(odoo, model, object_id, opts, context)
   end
 
   @doc """
@@ -235,21 +277,6 @@ defmodule Odoo do
   """
   def read_group(odoo = %Odoo.Session{}, model, opts \\ []) do
     Odoo.Core.read_group(odoo, model, opts)
-  end
-
-  @doc """
-  - Update objects by id
-
-  ### Examples
-
-  ```elixir
-  iex> {:ok, odoo} = Odoo.login()
-  iex> {:ok, result} = Odoo.write(odoo, "product.product", [63], [name: "Mega Pro 3"])
-  {:ok, true}
-  ```
-  """
-  def write(odoo = %Odoo.Session{}, model, object_id, opts \\ []) do
-    Odoo.Core.write(odoo, model, object_id, opts)
   end
 
   @doc """
