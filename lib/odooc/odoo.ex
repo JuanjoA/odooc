@@ -145,12 +145,24 @@ defmodule Odoo.Core do
     |> return_data(model, opts)
   end
 
-  def create(odoo = %Odoo.Session{}, model, opts \\ []) do
+  defp check_context_lang(user_context, lang) do
+    if lang do
+      Map.put(user_context, "lang", lang)
+    else
+      user_context
+    end
+  end
+
+  def create(odoo = %Odoo.Session{}, model, opts \\ [], context \\ []) do
     url = odoo.url <> @odoo_call_kw_endpoint
+    context = Enum.into(context, %{})
+    context_updated =
+      odoo.user_context
+      |> check_context_lang(Map.get(context, "lang"))
 
     kwargs =
       %{}
-      |> Map.put(:context, odoo.user_context)
+      |> Map.put(:context, context_updated)
 
     params = %{
       "model" => model,
@@ -163,13 +175,16 @@ defmodule Odoo.Core do
     |> return_data(model, opts)
   end
 
-  def write(odoo = %Odoo.Session{}, model, object_ids, opts \\ []) do
+  def write(odoo = %Odoo.Session{}, model, object_ids, opts \\ [], context \\ []) do
     url = odoo.url <> @odoo_call_kw_endpoint
+    context = Enum.into(context, %{})
+    context_updated =
+      odoo.user_context
+      |> check_context_lang(Map.get(context, :lang))
 
     kwargs =
       %{}
-      |> Map.put(:context, odoo.user_context)
-
+      |> Map.put(:context, context_updated)
     params = %{
       "model" => model,
       "method" => "write",
