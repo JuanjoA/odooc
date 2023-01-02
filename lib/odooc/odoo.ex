@@ -6,21 +6,6 @@ defmodule Odoo.Core do
   @odoo_call_kw_endpoint "/web/dataset/call_kw"
   @odoo_login_endpoint "/web/session/authenticate"
 
-  defp json_rpc(url, method, params, session_id \\ nil) do
-    data = %{
-      "jsonrpc" => "2.0",
-      "method" => method,
-      "params" => params,
-      "id" => :rand.uniform(9999)
-    }
-
-    if session_id do
-      Odoo.HttpClient.opost(url, data, session_id)
-    else
-      Odoo.HttpClient.opost(url, data)
-    end
-  end
-
   def login(user, password, database, url) do
     url_endpoint = url <> @odoo_login_endpoint
 
@@ -233,6 +218,21 @@ defmodule Odoo.Core do
 
       _ ->
         {:error, "Unknow Error from http client"}
+    end
+  end
+
+  defp json_rpc(url, method, params, session_id \\ nil) do
+    data = %{
+      "jsonrpc" => "2.0",
+      "method" => method,
+      "params" => params,
+      "id" => :rand.uniform(9999)
+    }
+
+    if session_id do
+      Odoo.HttpClient.opost(url, data, session_id)
+    else
+      Odoo.HttpClient.opost(url, data)
     end
   end
 end
