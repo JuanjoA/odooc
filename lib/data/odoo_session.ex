@@ -1,6 +1,6 @@
 defmodule Odoo.Session do
   @moduledoc """
-  Module to store Odoo session
+  Struct to store Odoo session
   """
   alias __MODULE__
 

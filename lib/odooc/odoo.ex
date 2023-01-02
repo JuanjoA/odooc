@@ -30,14 +30,14 @@ defmodule Odoo.Core do
       password: password
     }
 
-    case json_rpc(url_endpoint, "call", params) do
+    case check_response(json_rpc(url_endpoint, "call", params)) do
       {:error, message} ->
         {:error, message}
 
       {:ok, body, _status, cookie} ->
         odoo_session =
           Odoo.Session.new()
-          |> unpack_body(body["result"])
+          |> unpack_body(body)
           |> unpack_cookie(cookie)
           |> Map.put(:user, user)
           |> Map.put(:password, password)
@@ -48,8 +48,8 @@ defmodule Odoo.Core do
     end
   end
 
-  defp unpack_body(odoo = %Session{}, body) do
-    Map.put(odoo, :user_context, body["user_context"])
+  defp unpack_body(odoo = %Session{}, result) do
+    Map.put(odoo, :user_context, result["user_context"])
   end
 
   defp unpack_cookie(odoo = %Session{}, cookie) do
@@ -216,6 +216,20 @@ defmodule Odoo.Core do
       {:ok, body, _status, _cookie} ->
         result = Map.put(result, :data, body["result"])
         {:ok, result}
+
+      _ ->
+        {:error, "Unknow Error from http client"}
+    end
+  end
+
+  defp check_response(response) do
+    case response do
+      {:ok, %{"error" => error}, _status, _cookie} ->
+        # error from odoo, not for http client
+        {:error, "Odoo error: #{error["message"]} - #{error["data"]["message"]}"}
+
+      {:ok, body, status, cookie} ->
+        {:ok, body["result"], status, cookie}
 
       _ ->
         {:error, "Unknow Error from http client"}

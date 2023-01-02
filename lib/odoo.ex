@@ -46,7 +46,32 @@ defmodule Odoo do
   @spec login(String.t(), String.t(), String.t(), String.t()) ::
           {:ok, %Odoo.Session{}} | {:error, String.t()}
   def login(user, password, database, url) do
-    Odoo.Core.login(user, password, database, parse_url(url))
+    case check_params(user, password, database, url) do
+      {:ok, _} ->
+        Odoo.Core.login(user, password, database, parse_url(url))
+
+      {:error, message} ->
+        {:error, message}
+    end
+  end
+
+  defp check_params(user, password, database, url) do
+    cond do
+      is_nil(user) or String.length(user) == 0 ->
+        {:error, "User is required"}
+
+      is_nil(password) || String.length(password) == 0 ->
+        {:error, "Password is required"}
+
+      is_nil(database) || String.length(database) == 0 ->
+        {:error, "Database is required"}
+
+      is_nil(url) || String.length(url) == 0 ->
+        {:error, "Url is required"}
+
+      true ->
+        {:ok, "ok"}
+    end
   end
 
   @doc """
@@ -233,7 +258,9 @@ defmodule Odoo do
   odoo, "account.invoice", [
     domain: [["date_invoice", ">=", "2021-11-01"]],
     groupby: ["date_invoice:month"],
-    fields: ["number", "partner_id"], limit: 2, lazy: true])
+    fields: ["number", "partner_id"],
+    limit: 2,
+    lazy: true])
     %{
       "__domain" => [
      "&",
@@ -260,6 +287,14 @@ defmodule Odoo do
   ```
 
   """
+  @type option_valid_for_read_group ::
+          {:domain, [list(), ...]}
+          | {:fields, [String.t(), ...]}
+          | {:groupby, [String.t(), ...]}
+          | {:limit, non_neg_integer()}
+          | {:lazy, bool()}
+  @spec read_group(%Odoo.Session{}, String.t(), [option_valid_for_read]) ::
+          {:ok, %Odoo.Result{}} | {:error, String.t()}
   def read_group(odoo = %Odoo.Session{}, model, opts \\ []) do
     Odoo.Core.read_group(odoo, model, opts)
   end
