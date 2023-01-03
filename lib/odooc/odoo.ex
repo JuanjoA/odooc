@@ -1,4 +1,4 @@
-defmodule Odoo.Core do
+defmodule Odoo.Api do
   @moduledoc false
 
   alias Odoo.Session
@@ -6,24 +6,23 @@ defmodule Odoo.Core do
   @odoo_call_kw_endpoint "/web/dataset/call_kw"
   @odoo_login_endpoint "/web/session/authenticate"
 
-  def login(user, password, database, url) do
-    url_endpoint = url <> @odoo_login_endpoint
+def login(user, password, database, url) do
+    url_endpoint = parse_url(url) <> @odoo_login_endpoint
 
     params = %{
       db: database,
       login: user,
       password: password
     }
-
-    case check_response(json_rpc(url_endpoint, "call", params)) do
+    case json_rpc(url_endpoint, "call", params) do
       {:error, message} ->
         {:error, message}
 
-      {:ok, body, _status, cookie} ->
+      {:ok, body} ->
         odoo_session =
           Odoo.Session.new()
-          |> unpack_body(body)
-          |> unpack_cookie(cookie)
+          |> set_user_context(body["result"])
+          |> set_user_cookie(body["cookie"])
           |> Map.put(:user, user)
           |> Map.put(:password, password)
           |> Map.put(:database, database)
@@ -33,11 +32,11 @@ defmodule Odoo.Core do
     end
   end
 
-  defp unpack_body(odoo = %Session{}, result) do
+  defp set_user_context(odoo = %Session{}, result) do
     Map.put(odoo, :user_context, result["user_context"])
   end
 
-  defp unpack_cookie(odoo = %Session{}, cookie) do
+  defp set_user_cookie(odoo = %Session{}, cookie) do
     Map.put(odoo, :cookie, cookie)
   end
 
@@ -207,20 +206,6 @@ defmodule Odoo.Core do
     end
   end
 
-  defp check_response(response) do
-    case response do
-      {:ok, %{"error" => error}, _status, _cookie} ->
-        # error from odoo, not for http client
-        {:error, "Odoo error: #{error["message"]} - #{error["data"]["message"]}"}
-
-      {:ok, body, status, cookie} ->
-        {:ok, body["result"], status, cookie}
-
-      _ ->
-        {:error, "Unknow Error from http client"}
-    end
-  end
-
   defp json_rpc(url, method, params, session_id \\ nil) do
     data = %{
       "jsonrpc" => "2.0",
@@ -235,4 +220,13 @@ defmodule Odoo.Core do
       Odoo.HttpClient.opost(url, data)
     end
   end
+
+  defp parse_url(url) do
+    if String.last(url) == "/" do
+      String.slice(url, 0..-2)
+    else
+      url
+    end
+  end
+
 end

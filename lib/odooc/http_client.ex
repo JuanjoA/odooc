@@ -18,27 +18,29 @@ defmodule Odoo.HttpClient do
     |> return_data(url)
   end
 
-  defp return_data(data_tuple, url) do
-    case data_tuple do
-      {:error, :closed} ->
-        {:error, "Connection closed."}
-
-      {:error, :econnrefused} ->
-        {:error, "Connection refused."}
-
-      {:error, :nxdomain} ->
-        {:error, "Domain #{url} not exists."}
-
-      {:error, response} ->
-        {:error, response, response.status}
-
-      {:ok, response} ->
-        if response.status in [404] do
-          {:error, "Http client status: #{response.status}."}
-        else
-          cookie = Tesla.get_header(response, "set-cookie")
-          {:ok, response.body, response.status, cookie}
-        end
-    end
+  defp return_data({:error, :closed}=_data, _url) do
+    {:error, "Connection closed."}
   end
+  defp return_data({:error, :econnrefused}=_data, _url) do
+    {:error, "Connection refused."}
+  end
+  defp return_data({:error, :nxdomain}=_data, url) do
+    {:error, "Domain #{url} not exists."}
+  end
+  defp return_data({:error, response}=_data, _url) do
+    {:error, response}
+  end
+  defp return_data(
+    { :ok,  %{body: %{"error"=> error}}=_data }, _url) do
+    {:error, "#{error["message"]} - #{error["data"]["message"]}."}
+  end
+  defp return_data({:ok, response}=_data, _url) when response.status in [404] do
+    {:error, "Http client status: #{response.status}."}
+  end
+  defp return_data({:ok, response}=_data, _url) do
+    cookie = Tesla.get_header(response, "set-cookie")
+    new_body = Map.put(response.body, "cookie", cookie)
+    {:ok, new_body}
+  end
+
 end

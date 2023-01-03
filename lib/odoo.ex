@@ -18,7 +18,7 @@ defmodule Odoo do
 
   - Login in Odoo and set session_id for future calls
 
-  ### Params
+  ### Params (required)
   - user: string  Odoo user
   - password: string  Odoo password
   - database: string  Odoo database
@@ -32,14 +32,13 @@ defmodule Odoo do
   "https://mydatabasename.odoo.com")
   {:ok,
   %Odoo.Session{
-    cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
+    cookie: "session_id=c8e544d0b305920adgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
     database: "mydatabasename",
     password: "admin",
     url: "https://mydatabasename.odoo.com",
     user: "admin",
     user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
   }}
-
 
   ```
   """
@@ -48,29 +47,10 @@ defmodule Odoo do
   def login(user, password, database, url) do
     case check_params(user, password, database, url) do
       {:ok, _} ->
-        Odoo.Core.login(user, password, database, parse_url(url))
+        Odoo.Api.login(user, password, database, url)
 
       {:error, message} ->
         {:error, message}
-    end
-  end
-
-  defp check_params(user, password, database, url) do
-    cond do
-      is_nil(user) or String.length(user) == 0 ->
-        {:error, "User is required"}
-
-      is_nil(password) || String.length(password) == 0 ->
-        {:error, "Password is required"}
-
-      is_nil(database) || String.length(database) == 0 ->
-        {:error, "Database is required"}
-
-      is_nil(url) || String.length(url) == 0 ->
-        {:error, "Url is required"}
-
-      true ->
-        {:ok, "ok"}
     end
   end
 
@@ -130,7 +110,7 @@ defmodule Odoo do
   @spec search_read(%Odoo.Session{}, String.t(), [option]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   def search_read(odoo = %Odoo.Session{}, model, opts \\ []) do
-    Odoo.Core.search_read(odoo, model, opts)
+    Odoo.Api.search_read(odoo, model, opts)
   end
 
   @doc """
@@ -176,7 +156,7 @@ defmodule Odoo do
   @spec search(%Odoo.Session{}, String.t(), [option_valid_for_search]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   def search(odoo = %Odoo.Session{}, model, opts \\ []) do
-    Odoo.Core.search(odoo, model, opts)
+    Odoo.Api.search(odoo, model, opts)
   end
 
   @doc """
@@ -205,7 +185,7 @@ defmodule Odoo do
   @spec create(%Odoo.Session{}, String.t(), [odoo_fields]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   def create(odoo = %Odoo.Session{}, model, opts \\ []) do
-    Odoo.Core.create(odoo, model, opts)
+    Odoo.Api.create(odoo, model, opts)
   end
 
   @doc """
@@ -236,7 +216,7 @@ defmodule Odoo do
   @spec read(%Odoo.Session{}, String.t(), [non_neg_integer(), ...], [option_valid_for_read]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   def read(odoo = %Odoo.Session{}, model, object_id, opts \\ []) do
-    Odoo.Core.read(odoo, model, object_id, opts)
+    Odoo.Api.read(odoo, model, object_id, opts)
   end
 
   @doc """
@@ -296,7 +276,7 @@ defmodule Odoo do
   @spec read_group(%Odoo.Session{}, String.t(), [option_valid_for_read]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   def read_group(odoo = %Odoo.Session{}, model, opts \\ []) do
-    Odoo.Core.read_group(odoo, model, opts)
+    Odoo.Api.read_group(odoo, model, opts)
   end
 
   @doc """
@@ -331,7 +311,7 @@ defmodule Odoo do
   ```
   """
   def write(odoo = %Odoo.Session{}, model, object_id, opts \\ []) do
-    Odoo.Core.write(odoo, model, object_id, opts)
+    Odoo.Api.write(odoo, model, object_id, opts)
   end
 
   @doc """
@@ -357,7 +337,7 @@ defmodule Odoo do
 
   """
   def delete(odoo = %Odoo.Session{}, model, object_id) do
-    Odoo.Core.delete(odoo, model, object_id)
+    Odoo.Api.delete(odoo, model, object_id)
   end
 
   @doc """
@@ -478,11 +458,23 @@ defmodule Odoo do
     Odoo.search_read(odoo, result.model, new_opts)
   end
 
-  defp parse_url(url) do
-    if String.last(url) == "/" do
-      String.slice(url, 0..-2)
-    else
-      url
+  defp check_params(user, password, database, url) do
+    cond do
+      is_nil(user) or String.length(user) == 0 ->
+        {:error, "User is required"}
+
+      is_nil(password) || String.length(password) == 0 ->
+        {:error, "Password is required"}
+
+      is_nil(database) || String.length(database) == 0 ->
+        {:error, "Database is required"}
+
+      is_nil(url) || String.length(url) == 0 ->
+        {:error, "Url is required"}
+
+      true ->
+        {:ok, "ok"}
     end
   end
+
 end
