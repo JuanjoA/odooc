@@ -2,7 +2,7 @@ defmodule OdoocTest do
   use ExUnit.Case
   # doctest Odoo
 
-  test "greets the world" do
+  test "login ok returns {:ok, session}" do
     assert true
   end
 end
