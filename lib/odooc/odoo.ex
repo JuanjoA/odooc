@@ -6,7 +6,7 @@ defmodule Odoo.Api do
   @odoo_call_kw_endpoint "/web/dataset/call_kw"
   @odoo_login_endpoint "/web/session/authenticate"
 
-def login(user, password, database, url) do
+  def login(user, password, database, url) do
     url_endpoint = parse_url(url) <> @odoo_login_endpoint
 
     params = %{
@@ -215,9 +215,11 @@ def login(user, password, database, url) do
     }
 
     if session_id do
-      Odoo.HttpClient.opost(url, data, session_id)
+      # Odoo.HttpClient.opost(url, data, session_id)
+      Odoo.HttpClientAdapter.opost(url, data, session_id)
     else
-      Odoo.HttpClient.opost(url, data)
+      Odoo.HttpClientAdapter.opost(url, data)
+      # Odoo.HttpClient.opost(url, data)
     end
   end
 
