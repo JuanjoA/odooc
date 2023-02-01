@@ -39,6 +39,11 @@ defmodule Odoo.HttpClient do
       # Error from Odoo response, not for http client
     {:error, "#{error["message"]} - #{error["data"]["message"]}."}
   end
+  defp return_data({:ok,
+    %{"body" => %{"result"=> %{"user_context" => user_context}}}=_data, _url}) when is_nil(user_context) do
+    IO.puts "> VAMOS POR AQUÍ!!!"
+    {:error, "Odoo login failed!"}
+  end
   defp return_data({:ok, response}=_data, _url) when response.status in [404] do
     {:error, "Http client status: #{response.status}."}
   end

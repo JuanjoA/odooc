@@ -7,6 +7,7 @@ defmodule OdooCoreTest do
   setup :verify_on_exit!
 
   describe "Odoo.Core.login/4" do
+
     test "> login fails returns {:error, String.t()}" do
       msg_err = "Login failed"
       expect(
@@ -50,7 +51,6 @@ defmodule OdooCoreTest do
       assert odoo.cookie == "a cookie"
       assert odoo.user_context == acontext
     end
-
   end
 
 end
