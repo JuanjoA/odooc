@@ -47,7 +47,7 @@ defmodule Odoo do
   def login(user, password, database, url) do
     case check_params(user, password, database, url) do
       {:ok, _} ->
-        Odoo.Api.login(user, password, database, url)
+        Odoo.Core.login(user, password, database, url)
 
       {:error, message} ->
         {:error, message}
@@ -110,7 +110,7 @@ defmodule Odoo do
   @spec search_read(%Odoo.Session{}, String.t(), [option]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   def search_read(odoo = %Odoo.Session{}, model, opts \\ []) do
-    Odoo.Api.search_read(odoo, model, opts)
+    Odoo.Core.search_read(odoo, model, opts)
   end
 
   @doc """
@@ -156,7 +156,7 @@ defmodule Odoo do
   @spec search(%Odoo.Session{}, String.t(), [option_valid_for_search]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   def search(odoo = %Odoo.Session{}, model, opts \\ []) do
-    Odoo.Api.search(odoo, model, opts)
+    Odoo.Core.search(odoo, model, opts)
   end
 
   @doc """
@@ -185,7 +185,7 @@ defmodule Odoo do
   @spec create(%Odoo.Session{}, String.t(), [odoo_fields]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   def create(odoo = %Odoo.Session{}, model, opts \\ []) do
-    Odoo.Api.create(odoo, model, opts)
+    Odoo.Core.create(odoo, model, opts)
   end
 
   @doc """
@@ -216,7 +216,7 @@ defmodule Odoo do
   @spec read(%Odoo.Session{}, String.t(), [non_neg_integer(), ...], [option_valid_for_read]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   def read(odoo = %Odoo.Session{}, model, object_id, opts \\ []) do
-    Odoo.Api.read(odoo, model, object_id, opts)
+    Odoo.Core.read(odoo, model, object_id, opts)
   end
 
   @doc """
@@ -276,7 +276,7 @@ defmodule Odoo do
   @spec read_group(%Odoo.Session{}, String.t(), [option_valid_for_read]) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
   def read_group(odoo = %Odoo.Session{}, model, opts \\ []) do
-    Odoo.Api.read_group(odoo, model, opts)
+    Odoo.Core.read_group(odoo, model, opts)
   end
 
   @doc """
@@ -311,7 +311,7 @@ defmodule Odoo do
   ```
   """
   def write(odoo = %Odoo.Session{}, model, object_id, opts \\ []) do
-    Odoo.Api.write(odoo, model, object_id, opts)
+    Odoo.Core.write(odoo, model, object_id, opts)
   end
 
   @doc """
@@ -337,7 +337,7 @@ defmodule Odoo do
 
   """
   def delete(odoo = %Odoo.Session{}, model, object_id) do
-    Odoo.Api.delete(odoo, model, object_id)
+    Odoo.Core.delete(odoo, model, object_id)
   end
 
   @doc """

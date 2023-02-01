@@ -6,11 +6,51 @@ defmodule OdoocTest do
   # Make sure mocks are verified when the test exits
   setup :verify_on_exit!
 
-  test "test error wip..." do
-    Odoo.MockHttpClientAdapter
-    |> expect(:opost, fn {_url, _payload} -> {:ok, %{}} end)
+  describe "Odoo.Core.login/4" do
+    test "Returns {:error, String.t()} if login fails..." do
+      msg_err = "Login failed"
+      expect(
+        Odoo.ApiMock,
+        :callp, fn _url, _payload -> {:error, msg_err} end)
 
-    assert Odoo.HttpClientAdapter.opost("url", "payload") == {:ok, %{}}
+      assert {:error, ^msg_err} = Odoo.Core.login(
+        "user", "pass", "db", "http://localhost:8069")
+    end
+
+    test "Returns {:ok, Odoo.Session.t()} if login ok..." do
+      expect(
+        Odoo.ApiMock,
+        :callp, fn _url, _payload ->
+            resp = %Odoo.HttpClientResponse{
+              result: %{"user_context" => %{}},
+              cookie: "a cookie"}
+            {:ok, resp}
+         end)
+
+      assert {:ok, _odoo = %Odoo.Session{} } = Odoo.Core.login(
+        "user", "pass", "db", "http://localhost:8069")
+    end
+
+    test "Returns right values if login ok..." do
+      acontext = %{"lang" => "en_US", "tz" => "Europe/Brussels", "uid" => 2}
+      expect(
+        Odoo.ApiMock,
+        :callp, fn _url, _payload ->
+          resp = %Odoo.HttpClientResponse{
+            result: %{"user_context" => acontext},
+            cookie: "a cookie"}
+          {:ok, resp}
+        end)
+      {:ok, odoo = %Odoo.Session{} } = Odoo.Core.login(
+        "user", "pass", "db", "http://localhost:8069")
+      assert odoo.user == "user"
+      assert odoo.password == "pass"
+      assert odoo.database == "db"
+      assert odoo.url == "http://localhost:8069"
+      assert odoo.cookie == "a cookie"
+      assert odoo.user_context == acontext
+    end
+
   end
 
 end

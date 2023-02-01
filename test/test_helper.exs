@@ -1,3 +1,4 @@
-Mox.defmock(Odoo.MockHttpClientAdapter, for: Odoo.HttpClientAdapter)
-Application.put_env(:odoo, :httpclient, Odoo.MockHttpClientAdapter)
+Mox.defmock(Odoo.ApiMock, for: Odoo.Api)
+Application.put_env(:odoo, :apiclient, Odoo.ApiMock)
+
 ExUnit.start()

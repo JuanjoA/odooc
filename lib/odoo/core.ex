@@ -1,7 +1,5 @@
-defmodule Odoo.Api do
+defmodule Odoo.Core do
   @moduledoc false
-
-  alias Odoo.Session
 
   @odoo_call_kw_endpoint "/web/dataset/call_kw"
   @odoo_login_endpoint "/web/session/authenticate"
@@ -18,26 +16,18 @@ defmodule Odoo.Api do
       {:error, message} ->
         {:error, message}
 
-      {:ok, body} ->
+      {:ok, response = %Odoo.HttpClientResponse{}} ->
+        IO.inspect response.result["user_context"], label: "user_context >", pretty: true
         odoo_session =
           Odoo.Session.new()
-          |> set_user_context(body["result"])
-          |> set_user_cookie(body["cookie"])
+          |> Map.put(:user_context, response.result["user_context"])
+          |> Map.put(:cookie, response.cookie)
           |> Map.put(:user, user)
           |> Map.put(:password, password)
           |> Map.put(:database, database)
           |> Map.put(:url, url)
-
         {:ok, odoo_session}
     end
-  end
-
-  defp set_user_context(odoo = %Session{}, result) do
-    Map.put(odoo, :user_context, result["user_context"])
-  end
-
-  defp set_user_cookie(odoo = %Session{}, cookie) do
-    Map.put(odoo, :cookie, cookie)
   end
 
   def search(odoo = %Odoo.Session{}, model, opts \\ []) do
@@ -206,6 +196,9 @@ defmodule Odoo.Api do
     end
   end
 
+  @spec json_rpc(
+    String.t(), String.t(), map(), String.t() | nil)
+    :: {:ok, map()} | {:error, String.t()}
   defp json_rpc(url, method, params, session_id \\ nil) do
     data = %{
       "jsonrpc" => "2.0",
@@ -215,11 +208,9 @@ defmodule Odoo.Api do
     }
 
     if session_id do
-      # Odoo.HttpClient.opost(url, data, session_id)
-      Odoo.HttpClientAdapter.opost(url, data, session_id)
+      Odoo.Api.callp(url, data, session_id)
     else
-      Odoo.HttpClientAdapter.opost(url, data)
-      # Odoo.HttpClient.opost(url, data)
+      Odoo.Api.callp(url, data)
     end
   end
 

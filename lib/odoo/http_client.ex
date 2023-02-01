@@ -1,5 +1,7 @@
 defmodule Odoo.HttpClient do
   @moduledoc false
+  @behaviour Odoo.Api
+
   use Tesla
   adapter(Tesla.Adapter.Hackney, recv_timeout: 30_000)
 
@@ -9,11 +11,13 @@ defmodule Odoo.HttpClient do
   # plug(Tesla.Middleware.Logger)
   plug(Tesla.Middleware.JSON)
 
-  def opost(url, data) do
+  @impl Odoo.Api
+  def callp(url, data) do
     post(url, data) |> return_data(url)
   end
 
-  def opost(url, data, cookie) do
+  @impl Odoo.Api
+  def callp(url, data, cookie) do
     post(url, data, headers: [{"cookie", cookie}])
     |> return_data(url)
   end
@@ -32,6 +36,7 @@ defmodule Odoo.HttpClient do
   end
   defp return_data(
     { :ok,  %{body: %{"error"=> error}}=_data }, _url) do
+      # Error from Odoo response, not for http client
     {:error, "#{error["message"]} - #{error["data"]["message"]}."}
   end
   defp return_data({:ok, response}=_data, _url) when response.status in [404] do
@@ -39,8 +44,10 @@ defmodule Odoo.HttpClient do
   end
   defp return_data({:ok, response}=_data, _url) do
     cookie = Tesla.get_header(response, "set-cookie")
-    new_body = Map.put(response.body, "cookie", cookie)
-    {:ok, new_body}
+    resp = Odoo.HttpClientResponse.new()
+      |> Map.put(:result, response.body)
+      |> Map.put(:cookie, cookie)
+    {:ok, resp}
   end
 
 end
