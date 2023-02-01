@@ -45,7 +45,7 @@ defmodule Odoo.HttpClient do
   defp return_data({:ok, response}=_data, _url) do
     cookie = Tesla.get_header(response, "set-cookie")
     resp = Odoo.HttpClientResponse.new()
-      |> Map.put(:result, response.body)
+      |> Map.put(:result, response.body["result"])
       |> Map.put(:cookie, cookie)
     {:ok, resp}
   end

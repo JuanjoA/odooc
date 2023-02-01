@@ -1,4 +1,4 @@
-defmodule OdoocTest do
+defmodule OdooTest do
 
   use ExUnit.Case, async: true
   import Mox
@@ -6,8 +6,8 @@ defmodule OdoocTest do
   # Make sure mocks are verified when the test exits
   setup :verify_on_exit!
 
-  describe "Odoo.Core.login/4" do
-    test "Returns {:error, String.t()} if login fails..." do
+  describe "Odoo.login/4" do
+    test "> login fails returns {:error, String.t()}" do
       msg_err = "Login failed"
       expect(
         Odoo.ApiMock,
@@ -17,7 +17,7 @@ defmodule OdoocTest do
         "user", "pass", "db", "http://localhost:8069")
     end
 
-    test "Returns {:ok, Odoo.Session.t()} if login ok..." do
+    test "> login ok returns {:ok, Odoo.Session.t()}" do
       expect(
         Odoo.ApiMock,
         :callp, fn _url, _payload ->
@@ -31,7 +31,7 @@ defmodule OdoocTest do
         "user", "pass", "db", "http://localhost:8069")
     end
 
-    test "Returns right values if login ok..." do
+    test "> login ok returns right values" do
       acontext = %{"lang" => "en_US", "tz" => "Europe/Brussels", "uid" => 2}
       expect(
         Odoo.ApiMock,

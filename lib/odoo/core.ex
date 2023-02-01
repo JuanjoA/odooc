@@ -17,7 +17,6 @@ defmodule Odoo.Core do
         {:error, message}
 
       {:ok, response = %Odoo.HttpClientResponse{}} ->
-        IO.inspect response.result["user_context"], label: "user_context >", pretty: true
         odoo_session =
           Odoo.Session.new()
           |> Map.put(:user_context, response.result["user_context"])
