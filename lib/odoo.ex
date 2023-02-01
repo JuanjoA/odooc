@@ -56,7 +56,6 @@ defmodule Odoo do
 
   @doc """
 
-
   ### Examples
 
   - Search and read with default options (limit, domain, fields, offset and order)

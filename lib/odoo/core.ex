@@ -29,11 +29,11 @@ defmodule Odoo.Core do
     end
   end
 
+  @spec search(Odoo.Session.t(), String.t(), Keyword.t()) ::
+          {:ok, [Odoo.Result.t()]} | {:error, String.t()}
   def search(odoo = %Odoo.Session{}, model, opts \\ []) do
     url = odoo.url <> @odoo_call_kw_endpoint
-
     domain = Keyword.get(opts, :domain, [])
-
     kwargs =
       %{}
       |> Map.put(:limit, Keyword.get(opts, :limit, 0))
@@ -172,26 +172,19 @@ defmodule Odoo.Core do
     |> return_data(model, object_ids)
   end
 
-  defp return_data(data_tuple, model, opts) do
+  defp return_data(response_tuple, model, opts) do
     result =
       Odoo.Result.new()
       |> Map.put(:model, model)
       |> Map.put(:opts, opts)
 
-    case data_tuple do
-      {:error, message} ->
-        {:error, "Odoo error: #{message}"}
-
-      {:ok, %{"error" => error}, _status, _cookie} ->
-        # error from odoo, not for http client
-        {:error, "Odoo error: #{error["message"]} - #{error["data"]["message"]}"}
-
-      {:ok, body, _status, _cookie} ->
-        result = Map.put(result, :data, body["result"])
-        {:ok, result}
-
+    case response_tuple do
+      {:error, _} ->
+        response_tuple
+      {:ok, response = %Odoo.HttpClientResponse{}} ->
+        {:ok, Map.put(result, :data, response.result)}
       _ ->
-        {:error, "Unknow Error from http client"}
+        {:error, "Odoo.Core module: Unknow Error from http client"}
     end
   end
 
