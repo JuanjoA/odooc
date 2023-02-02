@@ -15,6 +15,8 @@
 
 * Add tests
 * Improve this README.md
+** next and prev docs update and test it, y spec
+** add execute_kw
 
 
 # Code review before publish

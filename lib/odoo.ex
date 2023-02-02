@@ -65,7 +65,7 @@ defmodule Odoo do
   - Put options to tune the query:
 
   ```elixir
-  {:ok, result} = Odoo.search_read(
+  {:ok, partners} = Odoo.search_read(
     odoo,
     "res.partner",
     [
@@ -74,18 +74,19 @@ defmodule Odoo do
       fields: ["name", "street"],
       offset: 11,
       order: "name asc"])
-      {:ok,
-      [
-        %{
-          "id" => 226,
-          "name" => "Antonio Fulanito de tal",
-          "street" => "Calle principal 1"
-        }
-        ]}
+
+  {:ok,
+  [
+    %{
+      "id" => 226,
+      "name" => "Antonio Fulanito de tal",
+      "street" => "Calle principal 1"
+    }
+    ]}
     ```
 
-
     - Search and read active and archived records (by default odoo only return active records)
+
     ```elixir
     {:ok, partners} = Odoo.search_read(
       odoo,
@@ -164,17 +165,6 @@ defmodule Odoo do
   ### Examples
 
   ```elixir
-  iex> {:ok, odoo} = Odoo.login(
-    ...>    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
-    {:ok,
-    %Odoo.Session{
-      cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
-      database: "mydatabasename",
-    password: "admin",
-    url: "https://mydatabasename.odoo.com",
-    user: "admin",
-    user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
-  }}
   iex> {:ok, product_id} = Odoo.create(odoo, "product.product", [name: "mi mega producto3"])
   {:ok, 63}
   ```
@@ -182,7 +172,7 @@ defmodule Odoo do
   """
   @type odoo_fields :: keyword()
   @spec create(%Odoo.Session{}, String.t(), [odoo_fields]) ::
-          {:ok, %Odoo.Result{}} | {:error, String.t()}
+          {:ok, integer()} | {:error, String.t()}
   def create(odoo = %Odoo.Session{}, model, opts \\ []) do
     Odoo.Core.create(odoo, model, opts)
   end
@@ -194,21 +184,18 @@ defmodule Odoo do
   ### Examples
 
   ```elixir
-  iex> {:ok, odoo} = Odoo.login(
-  ...>    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
-  {:ok,
-  %Odoo.Session{
-  cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
-  database: "mydatabasename",
-  password: "admin",
-  url: "https://mydatabasename.odoo.com",
-  user: "admin",
-  user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
-  }}
   iex> {:ok, product} = Odoo.read(
   odoo, "product.product", [63], [fields: ["name", "categ_id"]])
 
-  {:ok, [%{"categ_id" => [1, "All"], "id" => 63, "name" => "mi mega producto3"}]}
+  {:ok,
+  %Odoo.Result{
+    data: [
+      %{"id" => 63, "name" => "mi mega producto3", "categ_id" => [1, "All"]}
+    ],
+    model: "product.product",
+    opts: [fields: ["name", "categ_id"]]
+  }}
+
   ```
   """
   @type option_valid_for_read :: {:fields, [String.t(), ...]}
@@ -228,7 +215,7 @@ defmodule Odoo do
     - :groupby
     - :lazy
     - :orderby
-  - :offset
+    - :offset
 
   ### Examples
 
@@ -240,6 +227,10 @@ defmodule Odoo do
     fields: ["number", "partner_id"],
     limit: 2,
     lazy: true])
+
+    {:ok,
+     %Odoo.Result{
+      data: [
     %{
       "__domain" => [
      "&",
@@ -259,10 +250,11 @@ defmodule Odoo do
          ["date_invoice", "<", "2022-03-01"],
          ["date_invoice", ">=", "2021-11-01"]
          ],
-   "date_invoice:month" => "febrero 2022",
-   "date_invoice_count" => 32
-  }
-  ]}
+      "date_invoice:month" => "febrero 2022",
+      "date_invoice_count" => 32
+    }
+    ]}}
+
   ```
 
   """
@@ -284,22 +276,15 @@ defmodule Odoo do
   ### Examples
 
   ```elixir
-  iex> {:ok, odoo} = Odoo.login(
-  ...>    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
-  {:ok,
-  %Odoo.Session{
-  cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
-  database: "mydatabasename",
-  password: "admin",
-  url: "https://mydatabasename.odoo.com",
-  user: "admin",
-  user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
-  }}
-  iex> {:ok, result} = Odoo.write(odoo, "product.product", [63], [name: "Mega Pro 3"])
-  {:ok, true}
+  iex> {:ok, result}=Odoo.write odoo, "product.product", [63], [name: "Mega Pro 3"]
+{:ok,
+ %Odoo.Result{
+   data: true,
+   model: "product.product",
+   opts: [name: "Mega Pro 3"]
+ }}
 
-
-  Other example adding a many2many value to an odoo object:
+  Example adding a many2many value to an odoo object:
 
   category_to_link_id = 9
   {:ok, result} = Odoo.write(
@@ -309,6 +294,12 @@ defmodule Odoo do
       [category_id: [[4, category_to_link_id]] ])
   ```
   """
+  @type option_valid_for_write ::
+          | {:lazy, bool()}
+  @spec write(%Odoo.Session{}, String.t(),
+               list(non_neg_integer()) ,
+               keyword() ::
+          {:ok, %Odoo.Result{}} | {:error, String.t()}
   def write(odoo = %Odoo.Session{}, model, object_id, opts \\ []) do
     Odoo.Core.write(odoo, model, object_id, opts)
   end
@@ -319,20 +310,9 @@ defmodule Odoo do
     ### Examples
 
     ```elixir
-    iex> {:ok, odoo} = Odoo.login(
-      ...>    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
-      {:ok,
-      %Odoo.Session{
-        cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
-        database: "mydatabasename",
-        password: "admin",
-        url: "https://mydatabasename.odoo.com",
-        user: "admin",
-    user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
-  }}
-  iex> {:ok, result} = Odoo.delete(odoo, "product.product", [63])
-  {:ok, true}
-  ```
+iex(10)> {:ok, result} = Odoo.delete odoo, "product.template", [116]
+{:ok, %Odoo.Result{data: true, model: "product.template", opts: 't'}}
+    ```
 
   """
   def delete(odoo = %Odoo.Session{}, model, object_id) do
@@ -345,17 +325,6 @@ defmodule Odoo do
   ### Examples
 
   ```elixir
-  iex> {:ok, odoo} = Odoo.login(
-  ...>    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
-  {:ok,
-  %Odoo.Session{
-    cookie: "session_id=c8e544d0b305920afgdgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",
-    database: "mydatabasename",
-    password: "admin",
-  url: "https://mydatabasename.odoo.com",
-  user: "admin",
-  user_context: %{"lang" => "en_US", "tz" => "Asia/Calcutta", "uid" => 2}
-  }}
   iex> {:ok, result} = Odoo.search_read(
     ...>      odoo, "product.product", limit: 5, fields: ["name"], order: "id asc")
     {:ok,
