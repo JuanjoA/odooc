@@ -131,17 +131,24 @@ defmodule Odoo do
   ```elixir
   iex>  {:ok, partner_ids} = Odoo.search(
   odoo, "res.partner",
-  [ domain: [
-    ["name", "ilike", "Antonia%"],
-    ["customer", "=", true],
-      ["create_date",">=","2021-06-01"]
+  [ domain:
+      [
+        ["name", "ilike", "Antonia%"],
+        ["customer", "=", true],
+        ["create_date",">=","2021-06-01"]
       ],
       limit: 5,
       offset: 10,
       order: "name"
   ])
+  {:ok,
+    %Odoo.Result{
+      data: '[44]',
+      model: "res.partner",
+      opts: [domain: [["name", "ilike", "Lorraine%"], ["customer", "=", true],
+        ["create_date",">=","2021-06-01"]]]
+    }}
 
-  {:ok, [318519, 357088, 237581, 378802, 258340]}
   ```
 
   - Return one value is a single integer for the id
@@ -277,12 +284,12 @@ defmodule Odoo do
 
   ```elixir
   iex> {:ok, result}=Odoo.write odoo, "product.product", [63], [name: "Mega Pro 3"]
-{:ok,
- %Odoo.Result{
+  {:ok,
+  %Odoo.Result{
    data: true,
    model: "product.product",
    opts: [name: "Mega Pro 3"]
- }}
+  }}
 
   Example adding a many2many value to an odoo object:
 
@@ -294,14 +301,10 @@ defmodule Odoo do
       [category_id: [[4, category_to_link_id]] ])
   ```
   """
-  @type option_valid_for_write ::
-          | {:lazy, bool()}
-  @spec write(%Odoo.Session{}, String.t(),
-               list(non_neg_integer()) ,
-               keyword() ::
+  @spec write(%Odoo.Session{}, String.t(), list(non_neg_integer()), keyword()) ::
           {:ok, %Odoo.Result{}} | {:error, String.t()}
-  def write(odoo = %Odoo.Session{}, model, object_id, opts \\ []) do
-    Odoo.Core.write(odoo, model, object_id, opts)
+  def write(odoo = %Odoo.Session{}, model, object_id, fields \\ []) do
+    Odoo.Core.write(odoo, model, object_id, fields)
   end
 
   @doc """
@@ -310,9 +313,9 @@ defmodule Odoo do
     ### Examples
 
     ```elixir
-iex(10)> {:ok, result} = Odoo.delete odoo, "product.template", [116]
-{:ok, %Odoo.Result{data: true, model: "product.template", opts: 't'}}
-    ```
+  iex(10)> {:ok, result} = Odoo.delete odoo, "product.template", [116]
+  {:ok, %Odoo.Result{data: true, model: "product.template", opts: 't'}}
+      ```
 
   """
   def delete(odoo = %Odoo.Session{}, model, object_id) do
@@ -444,5 +447,4 @@ iex(10)> {:ok, result} = Odoo.delete odoo, "product.template", [116]
         {:ok, "ok"}
     end
   end
-
 end

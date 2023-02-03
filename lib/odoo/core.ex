@@ -12,6 +12,7 @@ defmodule Odoo.Core do
       login: user,
       password: password
     }
+
     case json_rpc(url_endpoint, "call", params) do
       {:error, message} ->
         {:error, message}
@@ -25,6 +26,7 @@ defmodule Odoo.Core do
           |> Map.put(:password, password)
           |> Map.put(:database, database)
           |> Map.put(:url, url)
+
         {:ok, odoo_session}
     end
   end
@@ -34,11 +36,12 @@ defmodule Odoo.Core do
   def search(odoo = %Odoo.Session{}, model, opts \\ []) do
     url = odoo.url <> @odoo_call_kw_endpoint
     domain = Keyword.get(opts, :domain, [])
+
     kwargs =
       %{}
       |> Map.put(:limit, Keyword.get(opts, :limit, 0))
       |> Map.put(:offset, Keyword.get(opts, :offset, 0))
-      |> Map.put(:order, Keyword.get(opts, :order, 0))
+      |> Map.put(:order, Keyword.get(opts, :order, nil))
       |> Map.put(:context, odoo.user_context)
 
     params = %{
@@ -181,16 +184,22 @@ defmodule Odoo.Core do
     case response_tuple do
       {:error, _} ->
         response_tuple
+
       {:ok, response = %Odoo.HttpClientResponse{}} ->
         {:ok, Map.put(result, :data, response.result)}
+
       _ ->
         {:error, "Odoo.Core module: Unknow Error from http client"}
     end
   end
 
   @spec json_rpc(
-    String.t(), String.t(), map(), String.t() | nil)
-    :: {:ok, map()} | {:error, String.t()}
+          String.t(),
+          String.t(),
+          map(),
+          String.t() | nil
+        ) ::
+          {:ok, map()} | {:error, String.t()}
   defp json_rpc(url, method, params, session_id \\ nil) do
     data = %{
       "jsonrpc" => "2.0",
@@ -213,5 +222,4 @@ defmodule Odoo.Core do
       url
     end
   end
-
 end

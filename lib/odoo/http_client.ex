@@ -22,36 +22,49 @@ defmodule Odoo.HttpClient do
     |> return_data(url)
   end
 
-  defp return_data({:error, :closed}=_data, _url) do
+  defp return_data({:error, :closed} = _data, _url) do
     {:error, "Connection closed."}
   end
-  defp return_data({:error, :econnrefused}=_data, _url) do
+
+  defp return_data({:error, :econnrefused} = _data, _url) do
     {:error, "Connection refused."}
   end
-  defp return_data({:error, :nxdomain}=_data, url) do
+
+  defp return_data({:error, :nxdomain} = _data, url) do
     {:error, "Domain #{url} not exists."}
   end
-  defp return_data({:error, response}=_data, _url) do
+
+  defp return_data({:error, response} = _data, _url) do
     {:error, response}
   end
+
   defp return_data(
-    { :ok,  %{body: %{"error"=> error}}=_data }, _url) do
-      # Error from Odoo response, not for http client
+         {:ok, %{body: %{"error" => error}} = _data},
+         _url
+       ) do
+    # Error from Odoo response, not for http client
     {:error, "#{error["message"]} - #{error["data"]["message"]}."}
   end
-  defp return_data({:ok,
-    %{"body" => %{"result"=> %{"user_context" => user_context}}}=_data, _url}) when is_nil(user_context) do
+
+  defp return_data(
+         {:ok, %{"body" => %{"result" => %{"user_context" => user_context}}} = _data, _url}
+       )
+       when is_nil(user_context) do
     {:error, "Odoo login failed!"}
   end
-  defp return_data({:ok, response}=_data, _url) when response.status in [404] do
+
+  defp return_data({:ok, response} = _data, _url) when response.status in [404] do
     {:error, "Http client status: #{response.status}."}
   end
-  defp return_data({:ok, response}=_data, _url) do
+
+  defp return_data({:ok, response} = _data, _url) do
     cookie = Tesla.get_header(response, "set-cookie")
-    resp = Odoo.HttpClientResponse.new()
+
+    resp =
+      Odoo.HttpClientResponse.new()
       |> Map.put(:result, response.body["result"])
       |> Map.put(:cookie, cookie)
+
     {:ok, resp}
   end
-
 end
