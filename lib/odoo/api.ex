@@ -1,5 +1,4 @@
 defmodule Odoo.Api do
-
   @type response :: Odoo.HttpClientResponse.t()
   @type url :: String.t()
   @type payload :: map()
@@ -13,5 +12,4 @@ defmodule Odoo.Api do
   def callp(url, payload, cookie), do: impl().callp(url, payload, cookie)
 
   defp impl, do: Application.get_env(:odoo, :apiclient, Odoo.HttpClient)
-
 end

@@ -1,5 +1,4 @@
 defmodule OdooCoreTest do
-
   use ExUnit.Case, async: true
   import Mox
 
@@ -7,43 +6,71 @@ defmodule OdooCoreTest do
   setup :verify_on_exit!
 
   describe "Odoo.Core.login/4" do
-
     test "> login fails returns {:error, String.t()}" do
       msg_err = "Login failed"
+
       expect(
         Odoo.ApiMock,
-        :callp, fn _url, _payload -> {:error, msg_err} end)
+        :callp,
+        fn _url, _payload -> {:error, msg_err} end
+      )
 
-      assert {:error, ^msg_err} = Odoo.Core.login(
-        "user", "pass", "db", "http://localhost:8069")
+      assert {:error, ^msg_err} =
+               Odoo.Core.login(
+                 "user",
+                 "pass",
+                 "db",
+                 "http://localhost:8069"
+               )
     end
 
     test "> login ok returns {:ok, Odoo.Session.t()}" do
       expect(
         Odoo.ApiMock,
-        :callp, fn _url, _payload ->
-            resp = %Odoo.HttpClientResponse{
-              result: %{"user_context" => %{}},
-              cookie: "a cookie"}
-            {:ok, resp}
-         end)
+        :callp,
+        fn _url, _payload ->
+          resp = %Odoo.HttpClientResponse{
+            result: %{"user_context" => %{}},
+            cookie: "a cookie"
+          }
 
-      assert {:ok, _odoo = %Odoo.Session{} } = Odoo.Core.login(
-        "user", "pass", "db", "http://localhost:8069")
+          {:ok, resp}
+        end
+      )
+
+      assert {:ok, _odoo = %Odoo.Session{}} =
+               Odoo.Core.login(
+                 "user",
+                 "pass",
+                 "db",
+                 "http://localhost:8069"
+               )
     end
 
     test "> login ok returns right values (user, pass, db,...)" do
       acontext = %{"lang" => "en_US", "tz" => "Europe/Brussels", "uid" => 2}
+
       expect(
         Odoo.ApiMock,
-        :callp, fn _url, _payload ->
+        :callp,
+        fn _url, _payload ->
           resp = %Odoo.HttpClientResponse{
             result: %{"user_context" => acontext},
-            cookie: "a cookie"}
+            cookie: "a cookie"
+          }
+
           {:ok, resp}
-        end)
-      {:ok, odoo = %Odoo.Session{} } = Odoo.Core.login(
-        "user", "pass", "db", "http://localhost:8069")
+        end
+      )
+
+      {:ok, odoo = %Odoo.Session{}} =
+        Odoo.Core.login(
+          "user",
+          "pass",
+          "db",
+          "http://localhost:8069"
+        )
+
       assert odoo.user == "user"
       assert odoo.password == "pass"
       assert odoo.database == "db"
@@ -52,5 +79,4 @@ defmodule OdooCoreTest do
       assert odoo.user_context == acontext
     end
   end
-
 end

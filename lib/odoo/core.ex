@@ -175,6 +175,24 @@ defmodule Odoo.Core do
     |> return_data(model, object_ids)
   end
 
+  def execute(odoo = %Odoo.Session{}, model, method, object_ids) do
+    url = odoo.url <> @odoo_call_kw_endpoint
+
+    kwargs =
+      %{}
+      |> Map.put(:context, odoo.user_context)
+
+    params = %{
+      "model" => model,
+      "method" => method,
+      "args" => object_ids,
+      "kwargs" => kwargs
+    }
+
+    json_rpc(url, "execute_kw", params, odoo.cookie)
+    |> return_data(model, object_ids)
+  end
+
   defp return_data(response_tuple, model, opts) do
     result =
       Odoo.Result.new()

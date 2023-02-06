@@ -429,6 +429,21 @@ defmodule Odoo do
     Odoo.search_read(odoo, result.model, new_opts)
   end
 
+  @doc """
+
+  Execute a method on a model (launch call to api odoo).
+
+  * Cancel a sale order with id 3
+  iex> {:ok, res2} = Odoo.execute(odoo, "sale.order", "action_confirm", [3])
+  {:ok, %Odoo.Result{data: true, model: "sale.order", opts: [3]}}
+
+  """
+  @spec execute(Odoo.Session.t(), String.t(), String.t(), list(non_neg_integer())) ::
+          {:ok, %Odoo.Result{}} | {:error, String.t()}
+  def execute(odoo = %Odoo.Session{}, model, method, args) do
+    Odoo.Core.execute(odoo, model, method, args)
+  end
+
   defp check_params(user, password, database, url) do
     cond do
       is_nil(user) or String.length(user) == 0 ->
