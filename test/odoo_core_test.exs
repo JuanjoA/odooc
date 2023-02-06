@@ -32,7 +32,7 @@ defmodule OdooCoreTest do
         "user", "pass", "db", "http://localhost:8069")
     end
 
-    test "> login ok returns right values" do
+    test "> login ok returns right values (user, pass, db,...)" do
       acontext = %{"lang" => "en_US", "tz" => "Europe/Brussels", "uid" => 2}
       expect(
         Odoo.ApiMock,
