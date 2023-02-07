@@ -175,7 +175,17 @@ defmodule Odoo.Core do
     |> return_data(model, object_ids)
   end
 
-  def execute(odoo = %Odoo.Session{}, model, method, object_ids) do
+  @spec execute(
+          %Odoo.Session{},
+          String.t(),
+          String.t(),
+          integer() | [integer()]
+        ) :: {:error, String.t()} | {:ok, %Odoo.Result{}}
+  def execute(odoo = %Odoo.Session{}, model, method, ids) when is_integer(ids) do
+    execute(odoo, model, method, [ids])
+  end
+
+  def execute(odoo = %Odoo.Session{}, model, method, ids) do
     url = odoo.url <> @odoo_call_kw_endpoint
 
     kwargs =
@@ -185,12 +195,12 @@ defmodule Odoo.Core do
     params = %{
       "model" => model,
       "method" => method,
-      "args" => object_ids,
+      "args" => ids,
       "kwargs" => kwargs
     }
 
     json_rpc(url, "execute_kw", params, odoo.cookie)
-    |> return_data(model, object_ids)
+    |> return_data(model, ids)
   end
 
   defp return_data(response_tuple, model, opts) do

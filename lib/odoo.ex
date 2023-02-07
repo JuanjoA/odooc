@@ -12,6 +12,8 @@ defmodule Odoo do
   - create
   - write
   - delete
+  - execute
+
   """
 
   @doc """
@@ -28,8 +30,7 @@ defmodule Odoo do
 
   ```
   iex> {:ok, odoo} = Odoo.login(
-  "admin", "admin", "mydatabasename",
-  "https://mydatabasename.odoo.com")
+    "admin", "admin", "mydatabasename", "https://mydatabasename.odoo.com")
   {:ok,
   %Odoo.Session{
     cookie: "session_id=c8e544d0b305920adgsfdfdsa7b0cfe; Expires=Fri, 06-May-2022 23:16:12 GMT; Max-Age=7776000; HttpOnly; Path=/",

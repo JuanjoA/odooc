@@ -1,4 +1,7 @@
 defmodule Odoo.Api do
+  @moduledoc """
+  Behaviour for Odoo API http clients.
+  """
   @type response :: Odoo.HttpClientResponse.t()
   @type url :: String.t()
   @type payload :: map()
