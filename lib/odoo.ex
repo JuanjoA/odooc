@@ -1,6 +1,6 @@
 defmodule Odoo do
   @moduledoc """
-  Library to access Odoo JSON-RPC API.
+  Library to access Odoo JSON-RPC API from Elixir.
 
   Provides the following methods for interacting with Odoo:
 
@@ -170,12 +170,12 @@ defmodule Odoo do
   @doc """
   - Create objects
   - Return {:ok, new_object_id} or {:error, message}
-  ### Examples
 
-  ```elixir
-  iex> {:ok, product_id} = Odoo.create(odoo, "product.product", [name: "mi mega producto3"])
-  {:ok, 63}
-  ```
+  ## Examples
+
+        iex> {:ok, product_id} = Odoo.create(
+          odoo, "product.product", [name: "mi mega producto3"])
+      {:ok, 63}
 
   """
   @type odoo_fields :: keyword()
