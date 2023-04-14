@@ -6,7 +6,7 @@ The module includes documentation for all functions and examples of how to use t
 
 # Documentation
 
-* See _doc_ folder
+* https://hexdocs.pm/odooc/api-reference.html
 
 
 # Todo
