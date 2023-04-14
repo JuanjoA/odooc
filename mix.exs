@@ -25,7 +25,7 @@ defmodule Odooc.MixProject do
       {:tesla, "~> 1.4"},
       {:hackney, "~> 1.17"},
       {:jason, ">= 1.0.0"},
-      {:ex_doc, "~> 0.11", only: :dev},
+      {:ex_doc, "~> 0.21", only: :dev},
       {:earmark, "~> 0.1", only: :dev},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:mox, "~> 1.0", only: :test}

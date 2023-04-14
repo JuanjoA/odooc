@@ -26,7 +26,7 @@ defmodule Odoo do
   - database: string  Odoo database
   - url: string  Odoo url, http or https
 
-  ### Examples
+  ### Example
 
   ```
   iex> {:ok, odoo} = Odoo.login(
@@ -57,7 +57,7 @@ defmodule Odoo do
 
   @doc """
 
-  ### Examples
+  ### Example
 
   - Search and read with default options (limit, domain, fields, offset and order)
 
@@ -128,7 +128,7 @@ defmodule Odoo do
   - limit: int, max number of rows to return from odoo
   - offset: int, offset over the default values to return
 
-  ### Examples
+  ### Example
   ```elixir
   iex>  {:ok, partner_ids} = Odoo.search(
   odoo, "res.partner",
@@ -171,7 +171,7 @@ defmodule Odoo do
   - Create objects
   - Return {:ok, new_object_id} or {:error, message}
 
-  ## Examples
+  ## Example
 
         iex> {:ok, product_id} = Odoo.create(
           odoo, "product.product", [name: "mi mega producto3"])
@@ -189,7 +189,7 @@ defmodule Odoo do
   - Read objects by id
   - Return {:ok, objects_list} or {:error, message}
 
-  ### Examples
+  ### Example
 
   ```elixir
   iex> {:ok, product} = Odoo.read(
@@ -225,7 +225,7 @@ defmodule Odoo do
     - :orderby
     - :offset
 
-  ### Examples
+  ### Example
 
   ```elixir
   iex> {:ok, result} = Odoo.read_group(
@@ -281,7 +281,7 @@ defmodule Odoo do
   @doc """
   - Update objects by id
 
-  ### Examples
+  ### Example
 
   ```elixir
   iex> {:ok, result}=Odoo.write odoo, "product.product", [63], [name: "Mega Pro 3"]
@@ -311,7 +311,7 @@ defmodule Odoo do
   @doc """
     - Delete objects by id
 
-    ### Examples
+    ### Example
 
     ```elixir
   iex(10)> {:ok, result} = Odoo.delete odoo, "product.template", [116]
@@ -324,9 +324,9 @@ defmodule Odoo do
   end
 
   @doc """
-  Pagination over results in search_read (launch call to api odoo)
+  Pagination over results in search_read (call to api odoo)
 
-  ### Examples
+  ### Example
 
   ```elixir
   iex> {:ok, result} = Odoo.search_read(
@@ -366,9 +366,9 @@ defmodule Odoo do
 
   @doc """
 
-  Get previous page results (launch call to api odoo)
+  Get previous page results (call to api odoo)
 
-  ### Examples
+  ### Example
 
   ```elixir
   iex> {:ok, odoo} = Odoo.login(
@@ -432,9 +432,9 @@ defmodule Odoo do
 
   @doc """
 
-  Execute a method on a model (launch call to api odoo).
+  Execute a method on a model (call to api odoo).
 
-  * Cancel a sale order with id 3
+  * Confirm a sale order with id 3
   iex> {:ok, res2} = Odoo.execute(odoo, "sale.order", "action_confirm", [3])
   {:ok, %Odoo.Result{data: true, model: "sale.order", opts: [3]}}
 
