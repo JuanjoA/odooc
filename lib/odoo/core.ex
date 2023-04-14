@@ -1,28 +1,11 @@
 defmodule Odoo.Core do
   @moduledoc false
 
-  alias Odoo.Session
-
   @odoo_call_kw_endpoint "/web/dataset/call_kw"
   @odoo_login_endpoint "/web/session/authenticate"
 
-  defp json_rpc(url, method, params, session_id \\ nil) do
-    data = %{
-      "jsonrpc" => "2.0",
-      "method" => method,
-      "params" => params,
-      "id" => :rand.uniform(9999)
-    }
-
-    if session_id do
-      Odoo.HttpClient.opost(url, data, session_id)
-    else
-      Odoo.HttpClient.opost(url, data)
-    end
-  end
-
   def login(user, password, database, url) do
-    url_endpoint = url <> @odoo_login_endpoint
+    url_endpoint = parse_url(url) <> @odoo_login_endpoint
 
     params = %{
       db: database,
@@ -34,11 +17,11 @@ defmodule Odoo.Core do
       {:error, message} ->
         {:error, message}
 
-      {:ok, body, _status, cookie} ->
+      {:ok, response = %Odoo.HttpClientResponse{}} ->
         odoo_session =
           Odoo.Session.new()
-          |> unpack_body(body["result"])
-          |> unpack_cookie(cookie)
+          |> Map.put(:user_context, response.result["user_context"])
+          |> Map.put(:cookie, response.cookie)
           |> Map.put(:user, user)
           |> Map.put(:password, password)
           |> Map.put(:database, database)
@@ -48,24 +31,17 @@ defmodule Odoo.Core do
     end
   end
 
-  defp unpack_body(odoo = %Session{}, body) do
-    Map.put(odoo, :user_context, body["user_context"])
-  end
-
-  defp unpack_cookie(odoo = %Session{}, cookie) do
-    Map.put(odoo, :cookie, cookie)
-  end
-
+  @spec search(Odoo.Session.t(), String.t(), Keyword.t()) ::
+          {:ok, [Odoo.Result.t()]} | {:error, String.t()}
   def search(odoo = %Odoo.Session{}, model, opts \\ []) do
     url = odoo.url <> @odoo_call_kw_endpoint
-
     domain = Keyword.get(opts, :domain, [])
 
     kwargs =
       %{}
       |> Map.put(:limit, Keyword.get(opts, :limit, 0))
       |> Map.put(:offset, Keyword.get(opts, :offset, 0))
-      |> Map.put(:order, Keyword.get(opts, :order, 0))
+      |> Map.put(:order, Keyword.get(opts, :order, nil))
       |> Map.put(:context, odoo.user_context)
 
     params = %{
@@ -214,30 +190,79 @@ defmodule Odoo.Core do
     |> return_data(model, object_ids)
   end
 
-  defp return_data(data_tuple, model, opts) do
+  @spec execute(
+          %Odoo.Session{},
+          String.t(),
+          String.t(),
+          integer() | [integer()]
+        ) :: {:error, String.t()} | {:ok, %Odoo.Result{}}
+  def execute(odoo = %Odoo.Session{}, model, method, ids) when is_integer(ids) do
+    execute(odoo, model, method, [ids])
+  end
+
+  def execute(odoo = %Odoo.Session{}, model, method, ids) do
+    url = odoo.url <> @odoo_call_kw_endpoint
+
+    kwargs =
+      %{}
+      |> Map.put(:context, odoo.user_context)
+
+    params = %{
+      "model" => model,
+      "method" => method,
+      "args" => ids,
+      "kwargs" => kwargs
+    }
+
+    json_rpc(url, "execute_kw", params, odoo.cookie)
+    |> return_data(model, ids)
+  end
+
+  defp return_data(response_tuple, model, opts) do
     result =
       Odoo.Result.new()
       |> Map.put(:model, model)
       |> Map.put(:opts, opts)
 
-    case data_tuple do
-      {:error, message} ->
-        {:error, "Odoo error: #{message}"}
+    case response_tuple do
+      {:error, _} ->
+        response_tuple
 
-      {:ok, %{"error" => error}, _status, _cookie} ->
-        # error from odoo, not for http client
-        {:error, "Odoo error: #{error["message"]} - #{error["data"]["message"]}"}
-
-      {:ok, %{"error" => error}, _status} ->
-        # error from odoo, not for http client
-        {:error, "Odoo error: #{error["message"]} - #{error["data"]["message"]}"}
-
-      {:ok, body, _status, _cookie} ->
-        result = Map.put(result, :data, body["result"])
-        {:ok, result}
+      {:ok, response = %Odoo.HttpClientResponse{}} ->
+        {:ok, Map.put(result, :data, response.result)}
 
       _ ->
-        {:error, "Unknow Error from http client"}
+        {:error, "Odoo.Core module: Unknow Error from http client"}
+    end
+  end
+
+  @spec json_rpc(
+          String.t(),
+          String.t(),
+          map(),
+          String.t() | nil
+        ) ::
+          {:ok, map()} | {:error, String.t()}
+  defp json_rpc(url, method, params, session_id \\ nil) do
+    data = %{
+      "jsonrpc" => "2.0",
+      "method" => method,
+      "params" => params,
+      "id" => :rand.uniform(9999)
+    }
+
+    if session_id do
+      Odoo.Api.callp(url, data, session_id)
+    else
+      Odoo.Api.callp(url, data)
+    end
+  end
+
+  defp parse_url(url) do
+    if String.last(url) == "/" do
+      String.slice(url, 0..-2)
+    else
+      url
     end
   end
 end
